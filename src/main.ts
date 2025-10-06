@@ -5,17 +5,26 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Enable lifecycle hooks for shutdown (SIGINT, SIGTERM, etc.)
+  app.enableShutdownHooks();
+
+  // Apply global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,           // Strip properties that are not in the DTO
-      forbidNonWhitelisted: true,// Throw an error if non-whitelisted values are provided
-      transform: true,           // Automatically transform payloads to DTO instances
+      whitelist: true,             // Remove properties not in the DTO
+      forbidNonWhitelisted: true,  // Throw an error for unknown properties
+      transform: true,             // Transform payloads to DTO instances
       transformOptions: {
-        enableImplicitConversion: true, // Allow simple type conversion (e.g., string -> number)
+        enableImplicitConversion: true, // Allow automatic type conversion
       },
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3000);
+  // Start the server
+  const port = process.env.PORT ?? 3000;
+  await app.listen(port);
+
+  console.log(`🚀 Application running on: http://localhost:${port}`);
 }
+
 bootstrap();
